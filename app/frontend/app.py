@@ -409,10 +409,10 @@ if st.session_state["indices_creados"]:
                         # stream_desde_api({"indice" : st.session_state["indice"]})
                         # # requests.post("http://localhost:8080/v1/agent-generator/", json={"prompt" : {"indice" : st.session_state["indice"]}}, stream=True, timeout=600)
                         # )
-                        doc_indice = requests.post("http://localhost:8080/v1/agent-generator/", json={"prompt" : {"indice" : st.session_state["indice"]}}, timeout=600)
+                        doc_indice = requests.post("http://localhost:8080/v1/agent-generator/", json={"prompt" : {"indice" : st.session_state["indice"]}})
                         st.session_state["propuesta_doc_indice"][
                             st.session_state["indice"] - 1
-                        ] = doc_indice
+                        ] = doc_indice.json()["respuesta"]
 
                         # indices_res = requests.post(API_URL, json={"prompt": payload})
 

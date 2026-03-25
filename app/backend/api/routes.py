@@ -103,10 +103,14 @@ def chat_agent_generator(req: PromptRequest):
         # return StreamingResponse(generator.stream_async(GENERATOR_PROMPT), media_type="text/event-stream")
         # texto = respuesta["response"][0]
     except Exception as e:
-            # Handle errors gracefully in streaming context
-            error_response = {"error": str(e), "type": "stream_error"}
-            print(f"Streaming error: {error_response}")
-            yield error_response
+        texto = str(respuesta)  # fallback en caso de formato inesperado
+        # Devolver la respuesta procesada en formato JSON
+        return {"respuesta": texto}
+
+            # # Handle errors gracefully in streaming context
+            # error_response = {"error": str(e), "type": "stream_error"}
+            # print(f"Streaming error: {error_response}")
+            # yield error_response
 
 
 if __name__ == "__main__":
