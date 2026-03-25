@@ -1,0 +1,5 @@
+bedrock-agentcore
+bedrock-agentcore-starter-toolkit
+strands-agents==1.28.0
+strands-agents-evals
+strands-agents-tools==0.2.21
