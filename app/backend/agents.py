@@ -73,7 +73,7 @@ para este tipo de proyecto. Sigue las convenciones habituales de la contratació
 BUSCADOR_SYSTEM_PROMPT = """Eres un buscador experto en bases de datos de pliegos de prescripciones técnicas de la contratación pública española.
 Tu tarea es encontrar fragmentos de pliegos relevantes para el apartado que se está redactando utilizando la tool 'search_tool'.
 Recibes la descripción del apartado que se va a redactar y el índice del pliego generado por el analista.
-Si no encuentras información relevante, no devuelvas nada."""
+Devuelve exactamente el resultado de la tool search_tool, sin texto adicional ni explicaciones."""
 
 REDACTOR_SYSTEM_PROMPT = """Eres un redactor experto en pliegos de prescripciones técnicas de la contratación pública española.
 IMPORTANTE:

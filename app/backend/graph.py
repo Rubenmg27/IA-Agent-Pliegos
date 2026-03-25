@@ -4,9 +4,7 @@ from agents import create_buscador_agent, create_redactor_agent, create_revisor_
 
 def check_search_results(state):
     """Función de condición para decidir si el redactor debe redactar o no."""
-    if not state.get("buscador") or len(state["buscador"]) == 0:
-        return False
-    return True
+    return not state.results.get("buscador") == "ID not found"
 
 def create_graph():
     """Crea el grafo de agentes para la generación de pliegos."""
