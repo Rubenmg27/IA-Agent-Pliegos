@@ -5,6 +5,7 @@ from strands.models import BedrockModel
 from dotenv import load_dotenv
 from hooks.memory_hook import Memory, MemoryHookProvider
 from tools.search_tool import search_tool
+from schemas import PliegoAnalisis
 
 load_dotenv()
 
@@ -60,7 +61,7 @@ Debes devolver ÚNICAMENTE un objeto JSON con la siguiente estructura, sin texto
   "resumen_proyecto": "Breve descripción del proyecto",
   "apartados": [
     {
-      "titulo": "Numero del apartado",
+      "titulo": "Numero y título del apartado, por ejemplo: '1. Objeto del Contrato'",
       "descripcion": "Qué debe contener este apartado"
     }
   ]
@@ -111,7 +112,8 @@ def create_analista_agent() -> Agent:
     return Agent(
         model=model_analista,
         system_prompt=ANALISTA_SYSTEM_PROMPT,
-        hooks=[memory_hook],  # Añadimos el hook de memoria para guardar el estado del agente
+        hooks=[memory_hook], 
+        structured_output_model=PliegoAnalisis # Añadimos el hook de memoria para guardar el estado del agente
     )
 
 
