@@ -10,13 +10,13 @@ API_URL = "http://localhost:8080/v1/agent-anlist/"
 
 
 # ── Funcion auxiliar ───────────────────────────────────────────────────
-def stream_desde_api(payload):
+async def stream_desde_api(payload):
     """
     Convierte la respuesta de la API en un generador que Streamlit entiende.
     """
     url = "http://localhost:8080/v1/agent-generator/"
     try:
-        with requests.post(url, json=payload, stream=True, timeout=600) as r:
+        with requests.post(url, json={"prompt" : payload}, stream=True, timeout=600) as r:
             r.raise_for_status()
             for chunk in r.iter_content(chunk_size=None):
                 if chunk:
@@ -264,16 +264,16 @@ with col_form:
     generar_btn = st.button(
         "🚀 Generar Pliego con IA",
         type="primary",
-        # disabled=not (
-        #     tipo_proyecto
-        #     and descripcion
-        #     and caracteristicas_tecnicas
-        #     and plazo_ejecucion
-        #     and presupuesto
-        #     and localizacion
-        #     and selected_lang_name
-        #     and max_pages
-        # ),
+        disabled=not (
+            tipo_proyecto
+            and descripcion
+            and caracteristicas_tecnicas
+            and plazo_ejecucion
+            and presupuesto
+            and localizacion
+            and selected_lang_name
+            and max_pages
+        ),
     )
 
 # ── Resultados ────────────────────────────────────────────────────────────────
@@ -301,7 +301,7 @@ with col_result:
 
 # ── Acción principal ──────────────────────────────────────────────────────────
 if "documento_final" not in st.session_state:
-    st.session_state["documento_final"] = None
+    st.session_state["documento_final"] = []
 if "log_mensajes" not in st.session_state:
     st.session_state["log_mensajes"] = []
 if "ejecutando_api" not in st.session_state:
@@ -403,20 +403,27 @@ if st.session_state["indices_creados"]:
                 is None
                 and st.session_state["ejecutando_api"]
             ):
-                with st.spinner("🤖 Los agentes están trabajando..."):
-                    try:
-                        with st.chat_message("assistant", avatar="🧐"):
-                            doc_indice = st.write_stream(
-                                stream_desde_api(st.session_state["indice"])
-                            )
+                try:
+                    with st.chat_message("assistant", avatar="🧐"):
+                        # doc_indice = st.write_stream(
+                        # stream_desde_api({"indice" : st.session_state["indice"]})
+                        # # requests.post("http://localhost:8080/v1/agent-generator/", json={"prompt" : {"indice" : st.session_state["indice"]}}, stream=True, timeout=600)
+                        # )
+                        doc_indice = requests.post("http://localhost:8080/v1/agent-generator/", json={"prompt" : {"indice" : st.session_state["indice"]}}, timeout=600)
+                        st.session_state["propuesta_doc_indice"][
+                            st.session_state["indice"] - 1
+                        ] = doc_indice
 
-                            st.session_state["propuesta_doc_indice"][
-                                st.session_state["indice"] - 1
-                            ] = doc_indice
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Error: {e}")
-                        st.session_state["ejecutando_api"] = False
+                        # indices_res = requests.post(API_URL, json={"prompt": payload})
+
+                        # st.session_state["propuesta_indices"] = indices_res.json()[
+                        #     "respuesta"
+                        # ]
+
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error: {e}")
+                    st.session_state["ejecutando_api"] = False
 
             elif (
                 st.session_state["propuesta_doc_indice"][st.session_state["indice"] - 1]
@@ -439,9 +446,9 @@ if st.session_state["indices_creados"]:
                         st.session_state["doc_indice_creados"][
                             st.session_state["indice"] - 1
                         ] = True
-                        st.session_state["documento_final"] += st.session_state[
+                        st.session_state["documento_final"].append(st.session_state[
                             "propuesta_doc_indice"
-                        ][st.session_state["indice"] - 1]
+                        ][st.session_state["indice"] - 1])
                         st.session_state["log_mensajes"].append(
                             f"Documento sobre indice {st.session_state.get('indice') - 1} creado correctamente."
                         )

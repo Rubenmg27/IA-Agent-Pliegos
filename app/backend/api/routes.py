@@ -1,8 +1,12 @@
 # Dependencias
 from fastapi import FastAPI
 from pydantic import BaseModel
-from backend.agents import create_analista_agent
-from backend.graph import create_graph
+from fastapi.responses import StreamingResponse
+from app.backend.agents import create_analista_agent
+from app.backend.graph import create_graph
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Inicializa una instancia de la aplicación
 app = FastAPI()
@@ -81,19 +85,22 @@ def chat_agent_analist(req: PromptRequest):
 
 # Generar pliego del último  infice en memoria
 @app.post("/v1/agent-generator/", tags=["agente-generator"])
-async def chat_agent_generator(req: PromptRequest):
-    GENERATOR_PROMPT = f"""
+def chat_agent_generator(req: PromptRequest):
+    try:
+        GENERATOR_PROMPT = f"""
         Redacta un pliego de contratación de una entidad pública española.
         Tiene que atender este índice de secciones y especificación del documento:
-        {req.prompt["indice"]}
-    """
+        {req.prompt.get("indice")}
+        """
+        respuesta = generator(GENERATOR_PROMPT)
 
-    try:
-        async for event in generator.stream_async(GENERATOR_PROMPT):
-            text = parse_event(event)
-            if text:
-                yield text
+        return {"respuesta": respuesta["message"]["content"][0]["text"]}
+        # async for event in generator.stream_async(GENERATOR_PROMPT):
+        #     text = parse_event(event)
+        #     if text:
+        #         yield text
 
+        # return StreamingResponse(generator.stream_async(GENERATOR_PROMPT), media_type="text/event-stream")
         # texto = respuesta["response"][0]
     except Exception as e:
             # Handle errors gracefully in streaming context

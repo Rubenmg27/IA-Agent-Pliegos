@@ -1,13 +1,14 @@
 import os
 import json
+from datetime import datetime
 from strands import Agent, tool
 from strands.models import BedrockModel
 from dotenv import load_dotenv
-from hooks.memory_hook import Memory, MemoryHookProvider
-from tools.search_tool import search_tool
-from schemas import PliegoAnalisis
+from app.hooks.memory_hook import Memory, MemoryHookProvider
+from app.tools.search_tool import search_tool
+from .schemas import PliegoAnalisis
 
-load_dotenv()
+load_dotenv(override=True, dotenv_path="../../.env")
 
 # ── Configuración ─────────────────────────────────────────────────────────────
 AWS_REGION      = os.getenv("AWS_REGION", "eu-west-1")
@@ -97,12 +98,13 @@ def create_analista_agent() -> Agent:
     """Crea el agente analista (sin tools, solo genera el índice JSON)."""
     ACTOR_ID = "user-123"
     SESSION_ID = "session-abc-2026"
-    REGION = "us-east-1"
-    MEMORY_NAME = "mi-agente-memoria"
+    REGION = AWS_REGION
+    # MEMORY_NAME = "IA_AGENT_PLIEGOS_STM_%s" % datetime.now().strftime("%Y%m%d%H%M%S")
+    MEMORY_NAME = "IA_AGENT_PLIEGOS_STM_20260325155742_3EED2lAP6H"
 
-    memory_manager = Memory(actor_id=ACTOR_ID,     
-    session_id=SESSION_ID,     
-    region=REGION,     
+    memory_manager = Memory(actor_id=ACTOR_ID,
+    session_id=SESSION_ID,
+    region=REGION,
     name_memory=MEMORY_NAME )
 
     session = memory_manager.initialize_session()
@@ -112,7 +114,7 @@ def create_analista_agent() -> Agent:
     return Agent(
         model=model_analista,
         system_prompt=ANALISTA_SYSTEM_PROMPT,
-        hooks=[memory_hook], 
+        hooks=[memory_hook],
         structured_output_model=PliegoAnalisis # Añadimos el hook de memoria para guardar el estado del agente
     )
 

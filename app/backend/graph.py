@@ -1,5 +1,5 @@
 from strands.multiagent import GraphBuilder
-from agents import create_buscador_agent, create_redactor_agent, create_revisor_agent
+from .agents import create_buscador_agent, create_redactor_agent, create_revisor_agent
 
 
 def check_search_results(state):
