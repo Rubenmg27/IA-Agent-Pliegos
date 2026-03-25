@@ -3,6 +3,8 @@ import json
 from strands import Agent, tool
 from strands.models import BedrockModel
 from dotenv import load_dotenv
+from hooks.memory_hook import Memory, MemoryHookProvider
+from tools.search_tool import search_tool
 
 load_dotenv()
 
@@ -73,7 +75,6 @@ Recibes la descripción del apartado que se va a redactar y el índice del plieg
 Si no encuentras información relevante, no devuelvas nada."""
 
 REDACTOR_SYSTEM_PROMPT = """Eres un redactor experto en pliegos de prescripciones técnicas de la contratación pública española.
-
 IMPORTANTE:
 - Adapta siempre el contenido a las cifras, plazos y características concretas del proyecto.
 - Usa lenguaje técnico y formal, propio de la contratación pública.
@@ -82,7 +83,7 @@ IMPORTANTE:
 
 
 REVISOR_SYSTEM_PROMPT = """Eres un revisor experto en pliegos de prescripciones técnicas de la contratación pública española.
-Tu tarea es revisar el pliego generado por el redactor y asegurarte de que:
+Asegrúrate de que el texto redactado cumple con los siguientes criterios:
 - Cumple con las convenciones formales y técnicas de la contratación pública.
 - No contiene errores, incoherencias o contradicciones.
 - El lenguaje es claro, formal y profesional.
@@ -93,12 +94,26 @@ Devuelve el pliego revisado, corrigiendo cualquier error que encuentres. Respond
 # ── Agentes ───────────────────────────────────────────────────────────────────
 def create_analista_agent() -> Agent:
     """Crea el agente analista (sin tools, solo genera el índice JSON)."""
-    agente_analista = Agent(
+    ACTOR_ID = "user-123"
+    SESSION_ID = "session-abc-2026"
+    REGION = "us-east-1"
+    MEMORY_NAME = "mi-agente-memoria"
+
+    memory_manager = Memory(actor_id=ACTOR_ID,     
+    session_id=SESSION_ID,     
+    region=REGION,     
+    name_memory=MEMORY_NAME )
+
+    session = memory_manager.initialize_session()
+
+    memory_hook = MemoryHookProvider(memory_session=session)
+
+    return Agent(
         model=model_analista,
         system_prompt=ANALISTA_SYSTEM_PROMPT,
+        hooks=[memory_hook],  # Añadimos el hook de memoria para guardar el estado del agente
     )
-    agente_analista.add_hook(after_tool_callback)
-    return agente_analista
+
 
 
 def create_buscador_agent() -> Agent:
@@ -124,3 +139,5 @@ def create_revisor_agent() -> Agent:
         model=model_revisor,
         system_prompt=REVISOR_SYSTEM_PROMPT,
     )
+
+
